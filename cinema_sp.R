@@ -1,3 +1,4 @@
+
 library(tidyverse)
 library(data.table)
 library(tmaptools)
@@ -7,6 +8,7 @@ library(mapview)
 library(sf)
 library(tidygeocoder)
 library(ggmap)
+library(leaflet)
 
 eliminar_colunas <- c("PAGINA_ELETRONICA_COMPLEXO", "COMPLEMENTO_ENDERECO", "COMPLEXO_ITINERANTE", "OPERACAO_USUAL", 
                       "EXIBIDOR", "REGISTRO_EXIBIDOR", "CNPJ_EXIBIDOR", "GRUPO_EXIBIDOR")
@@ -20,14 +22,13 @@ base_dados <- fread("C:\\Users\\mcaio\\Desktop\\Nova pasta\\Salas_cinemas.csv",
 
 
 
-base_sp <- base_dados %>% filter(MUNICIPIO_COMPLEXO == "SÃO PAULO" & SITUACAO_EXIBIDOR == "REGULAR")
+base_sp <- base_dados %>% 
+  filter(MUNICIPIO_COMPLEXO == "SÃO PAULO" & SITUACAO_EXIBIDOR == "REGULAR") %>%
+  unite(col = "endereco", c(ENDERECO_COMPLEXO, NUMERO_ENDERECO_COMPLEXO, BAIRRO_COMPLEXO), sep = " - " )
+  
 
 
-cinema_sp <- base_sp %>% 
-  unite(col = "endereco", c(ENDERECO_COMPLEXO,
-                            NUMERO_ENDERECO_COMPLEXO,
-                            BAIRRO_COMPLEXO),
-        sep = " - " )
+#cinema_sp <- base_sp %>% unite(col = "endereco", c(ENDERECO_COMPLEXO, NUMERO_ENDERECO_COMPLEXO, BAIRRO_COMPLEXO), sep = " - " )
 
 
 
@@ -89,7 +90,6 @@ endereco_cinema<- endereco_cinema %>% mutate(endereco = case_when(endereco == "A
                                                                   endereco == "RUA COSTA BRITO - 46" ~ "Rua Mário Lago, Jardim Guapira",TRUE ~ endereco))
 
 
-
 # Pegando as Latitudes e Longitudes
 
 lugares <- geocode_OSM(endereco_cinema$endereco, projection = 4326, as.sf = T)
@@ -97,22 +97,26 @@ lugares <- geocode_OSM(endereco_cinema$endereco, projection = 4326, as.sf = T)
 
 lugares %>% mapview() # mapa interativo
 
+leaflet(lugares) %>% addTiles() %>% addMarkers() # mapa interativo com leaflet
 
-mun_sp <- read_municipality(code_muni = 3550308, year = 2019)
 
-
-ggplot(lugares, aes(x = x_max , y = y_max))+geom_sf(data = mun_sp)
-
-lugares %>% ggplot(aes(x = x_max, y = y_max)) + geom_sf(aes(mun_sp))
-
+# Arquivo shape com os distritos de sp
 
 distrito_sp <- st_read("C:\\Users\\mcaio\\Desktop\\cinema\\LAYER_DISTRITO\\DEINFO_DISTRITO.shp")
 
-lugares %>% mapview()
+# mapa dos distritos de sp com a localização dos cinemas
+
+ggplot(distrito_sp) + 
+  geom_sf() + 
+  stat_sf_coordinates(data = lugares, size = 3, colour = "Blue")+
+  ylab(NULL)+
+  xlab(NULL)+
+  ggtitle("Cinema")+
+  theme_bw()
 
 
 
-
+# Modo diferente com outras funcoes
 
 qtm(mun_sp) +
   tm_legend(show = FALSE)
@@ -121,6 +125,4 @@ tm_shape(distrito_sp) +
   tm_fill() +
   tm_shape(lugares) +
   tm_bubbles(col = "red", size = 0.15) 
-
-
 
