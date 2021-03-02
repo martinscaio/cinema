@@ -1,4 +1,4 @@
-
+# Biblioteca ----------------------------------------------------------------------------------------------------
 library(tidyverse)
 library(data.table)
 library(tmaptools)
@@ -9,6 +9,8 @@ library(sf)
 library(tidygeocoder)
 library(ggmap)
 library(leaflet)
+
+# Dados ----------------------------------------------------------------------------------------------------
 
 eliminar_colunas <- c("PAGINA_ELETRONICA_COMPLEXO", "COMPLEMENTO_ENDERECO", "COMPLEXO_ITINERANTE", "OPERACAO_USUAL", 
                       "EXIBIDOR", "REGISTRO_EXIBIDOR", "CNPJ_EXIBIDOR", "GRUPO_EXIBIDOR")
@@ -21,6 +23,8 @@ base_dados <- fread("C:\\Users\\mcaio\\Desktop\\Nova pasta\\Salas_cinemas.csv",
 
 
 
+# Limpeza dados ----------------------------------------------------------------------------------------------------
+
 
 base_sp <- base_dados %>% 
   filter(MUNICIPIO_COMPLEXO == "SÃO PAULO" & SITUACAO_EXIBIDOR == "REGULAR") %>%
@@ -32,7 +36,7 @@ base_sp <- base_dados %>%
 
 
 
-cinema_sp <- cinema_sp %>% mutate(endereco = stringr::str_remove_all(endereco, ","),
+cinema_sp <- base_sp %>% mutate(endereco = stringr::str_remove_all(endereco, ","),
                                   endereco = abjutils::rm_accent(endereco),
                                   endereco = stringr::str_to_upper(endereco),
                                   endereco = stringr::str_replace_all(endereco, "^AV.", "AVENIDA "),
@@ -90,17 +94,19 @@ endereco_cinema<- endereco_cinema %>% mutate(endereco = case_when(endereco == "A
                                                                   endereco == "RUA COSTA BRITO - 46" ~ "Rua Mário Lago, Jardim Guapira",TRUE ~ endereco))
 
 
-# Pegando as Latitudes e Longitudes
+# Pegando as Latitudes e Longitudes----------------------------------------------------------------------------------------------------
 
 lugares <- geocode_OSM(endereco_cinema$endereco, projection = 4326, as.sf = T)
 
 
-lugares %>% mapview() # mapa interativo
+# mapas interativos
 
-leaflet(lugares) %>% addTiles() %>% addMarkers() # mapa interativo com leaflet
+lugares %>% mapview()
+
+leaflet(lugares) %>% addTiles() %>% addMarkers() 
 
 
-# Arquivo shape com os distritos de sp
+# Arquivo shape com os distritos de sp----------------------------------------------------------------------------------------------------
 
 distrito_sp <- st_read("C:\\Users\\mcaio\\Desktop\\cinema\\LAYER_DISTRITO\\DEINFO_DISTRITO.shp")
 
