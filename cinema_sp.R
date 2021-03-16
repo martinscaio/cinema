@@ -75,14 +75,16 @@ endereco_cinema <- cinema_sp %>%
                                      endereco == "RUA FRANCISCA ESPOSITO TONETTI - 105 - JARDIM GUAPIRA" ~ "RUA COSTA BRITO - 46", 
                                      endereco == "AVENIDA LUIZ IMPARATO - 564 - PARQUE CISPER" ~ "AVENIDA  LUIZ IMPARATO - 564",
                                      endereco == "RUA MARIA ANTONIA - 294 - VILA BUARQUE" ~ "RUA MARIA ANTONIA - 294",
-                                     endereco == "AVENIDA  DR. ANTONIO MARIA LAET - 566 - PARADA INGLESA" ~ "AVENIDA  DR. ANTONIO MARIA LAET - 566 - TUCURUVI",
+                                     endereco == "AVENIDA  DR. ANTONIO MARIA LAET - 566 - PARADA INGLESA" ~ "AVENIDA  DOUTOR ANTÔNIO MARIA LAET - 566 - TUCURUVI",
                                      endereco == "AVENIDA  DAS NACOES UNIDAS - 14401 - VILA GERTRUDES" ~ "AVENIDA  DAS NACOES UNIDAS - 14401" ,
                                      endereco == "PRACA FRANKLIN ROOSEVELT - 172 - CONSOLACAO" ~ "PRACA FRANKLIN ROOSEVELT - 172",
                                      endereco == "AVENIDA  LUIZ IMPARATO - 564 - PARQUE CISPER" ~ "AVENIDA  LUIS IMPARATO - 564",
                                      endereco == "AVENIDA SAO JOAO - 473 - CENTRO" ~ "AVENIDA  SAO JOAO - 473 - SAO PAULO",
                                      endereco == "RUA TREZE DE MAIO - 1947 - BELA VISTA" ~ "RUA 13 DE MAIO - 1947 - BELA VISTA - SAO PAULO",
                                      endereco == "AVENIDA  PRESIDENTE JUSCELINO KUBITSCHECK - 2041" ~ "Av. Pres. Juscelino Kubitschek, 2041 - Itaim Bibi",
-                                     endereco == "RUA FREI CANECA - 569" ~ "RUA FREI CANECA - 569- BELA VISTA", TRUE ~ endereco))
+                                     endereco == "RUA FREI CANECA - 569" ~ "RUA FREI CANECA - 569- BELA VISTA", 
+                                     endereco == "RUA GONCALVES CRESPO S/N. - 420 - TATUAPE" ~ "RUA GONÇALVES CRESPO - 420 - TATUAPE",
+                                     endereco == "AVENIDA  INACIO MONTEIRO - 6900 - CIDADE TIRADENTES" ~ "RUA INACIO MONTEIRO - 6900 - CIDADE TIRADENTES",TRUE ~ endereco))
 
 
 
@@ -90,7 +92,7 @@ endereco_cinema<- endereco_cinema %>% mutate(endereco = case_when(endereco == "A
                                                                   endereco == "AVENIDA  SAO JOAO - 473 - CENTRO" ~ "AVENIDA  SAO JOAO - 473 - SAO PAULO",
                                                                   endereco == "RUA TREZE DE MAIO - 1947 - PARAISO" ~ "RUA 13 DE MAIO - 1947 - BELA VISTA - SAO PAULO",
                                                                   endereco == "RUA FREI CANECA - 569" ~ "RUA FREI CANECA - 569- BELA VISTA",
-                                                                  endereco == "RUA ENGENHEIRO ARMANDO DE ARRUDA PEREIRA - 5241" ~ "Av. Eng. Armando de Arruda Pereira, 5241 - Vila do Encontro, São Paulo",
+                                                                  endereco == "RUA ENGENHEIRO ARMANDO DE ARRUDA PEREIRA - 5241" ~ "AVENIDA ENGENHEIRO ARMANDO DE ARRUDA PEREIRA - 5241, 5241 - Vila do Encontro, São Paulo",
                                                                   endereco == "RUA COSTA BRITO - 46" ~ "Rua Mário Lago, Jardim Guapira",TRUE ~ endereco))
 
 
