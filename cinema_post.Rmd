@@ -1,16 +1,47 @@
-# Biblioteca ----------------------------------------------------------------------------------------------------
+---
+title: "Georeferenciando dados com R "
+author: "Caio Martins"
+date: "15 de março de 2021"
+output: html_document
+---
+
+### Dados Georeferenciados 
+
+
+ Os dados georeferenciados são basicamente dados espaciais que utilizam sua real localização no espaço geográfico. Essa localização é baseada em um par de coordenadas geográficas: latitude e longitude. 
+ Sempre que desejarmos plotar objetos em um mapa será necessário ter em mãos suas coordenadas geográficas.
+
+Em alguns casos os dados podem já estar georeferenciados, ou seja, trazendo consigo suas coordenadas no espaço geográfico, porém em outras situações é necessário georeferenciá-los. 
+
+Em suma, o ato de georeferenciar trata-se de coletar a localização(coordenadas) de um determinado objeto no espaço geográfico.
+
+No post de hoje irei demonstrar como georeferenciar dados no R.
+
+Para isso irei utilizar os dados sobre cinema na cidade de São Paulo. Na página do Ancine há um banco de dados sobre as **salas de exibição e complexos de cinema credenciados pela Ancine**. Irei utilizar este banco de dados para o ano de 2019. A ideia será georeferenciar as salas de cinema/complexos para plotar um mapa com as suas localizações. 
+
+**Atenção**: o post não pretende fazer qualquer análise sobre a distribuição geográfica de salas de exibição/cinemas na cidade de São Paulo. O objetivo deste post é APENAS demonstrar como trabalhar com dados não georeferenciados no R. 
+
+
+Os dados foram retirados do site da [Ancine](http://dados.cultura.gov.br/dataset/salas-de-exibicao-e-complexos-credenciados-ancine)
+
+Abaixo as bibliotecas que iremos utilizar:
+
+```{r message=FALSE, warning=FALSE}
 library(tidyverse)
 library(data.table)
-library(tmaptools)
-library(geobr)
 library(tmap)
-library(mapview)
-library(sf)
 library(tidygeocoder)
-library(ggmap)
 library(leaflet)
+library(sf)
+library(tmaptools)
 
-# Dados ----------------------------------------------------------------------------------------------------
+
+```
+
+Antes de tudo é necessário importar os dados:
+
+```{r}
+# DADOS 
 
 eliminar_colunas <- c("PAGINA_ELETRONICA_COMPLEXO", "COMPLEMENTO_ENDERECO", "COMPLEXO_ITINERANTE", "OPERACAO_USUAL", 
                       "EXIBIDOR", "REGISTRO_EXIBIDOR", "CNPJ_EXIBIDOR", "GRUPO_EXIBIDOR")
@@ -21,19 +52,27 @@ base_dados <- fread("C:\\Users\\mcaio\\Desktop\\Nova pasta\\Salas_cinemas.csv",
                     encoding = "Latin-1",
                     drop = eliminar_colunas)
 
+```
 
 
-# Limpeza dados ----------------------------------------------------------------------------------------------------
+Agora vamos dar uma organizada e LIMPAR os dados.
 
+Vou filtrar os cinemas da cidade de São Paulo e aqueles em que a situação é **regular**. Em seguida, irei unir em uma só coluna o ***endereço, número e o bairro***. Essas três informações numa só coluna facilitará o georeferenciamento.
+
+```{r}
 
 base_sp <- base_dados %>% 
   filter(MUNICIPIO_COMPLEXO == "SÃO PAULO" & SITUACAO_EXIBIDOR == "REGULAR") %>%
   unite(col = "endereco", c(ENDERECO_COMPLEXO, NUMERO_ENDERECO_COMPLEXO, BAIRRO_COMPLEXO), sep = " - " )
-  
 
+head(base_sp)
+```
 
+Em seguida, limpo e padronizo os endereços dos cinemas. 
 
+Aqui a ideia é eliminar pontuação, padronizar termos como AVENIDA, RODOVIA, além de reitirar informações erradas.
 
+```{r}
 cinema_sp <- base_sp %>% mutate(endereco = stringr::str_remove_all(endereco, ","),
                                   endereco = abjutils::rm_accent(endereco),
                                   endereco = stringr::str_to_upper(endereco),
@@ -41,13 +80,13 @@ cinema_sp <- base_sp %>% mutate(endereco = stringr::str_remove_all(endereco, ","
                                   endereco = stringr:: str_replace_all(endereco, "ROD", "RODOVIA "),
                                   endereco = stringr::str_replace_all(endereco, "AVENIDANIDA", "AVENIDA "),
                                   endereco = stringr::str_replace_all(endereco, "AVENIDA NIDA", "AVENIDA "))
-             
+```
 
+Não se assuste com o código abaixo! Tive que fazer ajustes manuais em alguns endereços. 
 
+A função **geocode_OSM** - responsável por coletar as coordenadas geográficas por meio do endereço - não estava encontrando as coordenadas desses endereços. Alguns endereços continham erros de digitação ou mesmo erros de localização. 
 
-
-
-# ajustes manuais em alguns endereços
+```{r}
 endereco_cinema <- cinema_sp %>% 
   select(REGISTRO_COMPLEXO, endereco) %>% 
   distinct(REGISTRO_COMPLEXO, .keep_all = TRUE) %>% 
@@ -103,52 +142,58 @@ endereco_cinema<- endereco_cinema %>% mutate(endereco = case_when(endereco == "A
                                                                   endereco == "RUA FREI CANECA - 569" ~ "RUA FREI CANECA - 569- BELA VISTA",
                                                                   endereco == "RUA ENGENHEIRO ARMANDO DE ARRUDA PEREIRA - 5241" ~ "AVENIDA ENGENHEIRO ARMANDO DE ARRUDA PEREIRA - 5241, 5241 - Vila do Encontro, São Paulo",
                                                                   endereco == "RUA COSTA BRITO - 46" ~ "Rua Mário Lago, Jardim Guapira",TRUE ~ endereco))
-# Pegando as Latitudes e Longitudes----------------------------------------------------------------------------------------------------
+
+
+
+```
+
+UFA! Eu sei que o código acima é feio e até meio cansativo, porém tive que fazer esses ajustes manuais consultando o Google Maps para a função geocode_OSM achar as coordenadas geográficas.
+
+
+Agora que já temos os dados organizados, limpos e os  endereços padronizados podemos coletar as latitudes e longitudes.
+
+
+```{r message=FALSE, warning=FALSE}
 
 lugares <- geocode_OSM(endereco_cinema$endereco, projection = 4326, as.sf = T)
 
+```
 
-# mapas interativos----------------------------------------------------------------------------------------------------
+Agora vamos visualizar no mapa esses pontos!
+```{r message=FALSE, warning=FALSE}
 
-lugares %>% mapview()
+leaflet(lugares) %>% addTiles() %>% addMarkers()
 
-leaflet(lugares) %>% addTiles() %>% addMarkers() 
+```
 
+Que tal fazermos um mapa com ggplot e as coordenadas ?!
 
-# Arquivo shape com os distritos de sp----------------------------------------------------------------------------------------------------
+Vou importar um arquivo shape dos distritos de SP e em seguida plotar o mapa
 
+```{r echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+# lendo o arquivo
 distrito_sp <- st_read("C:\\Users\\mcaio\\Desktop\\cinema\\LAYER_DISTRITO\\DEINFO_DISTRITO.shp")
-
-# mapa dos distritos de sp com a localização dos cinemas
 
 ggplot(distrito_sp) + 
   geom_sf() + 
-  stat_sf_coordinates(data = lugares, size = 2.4, colour = "Blue")+
+  stat_sf_coordinates(data = lugares, size = 2, colour = "Blue")+
   ylab(NULL)+
   xlab(NULL)+
   ggtitle("Salas de Exibição e Complexos em SP")+
   theme_bw()
 
+```
 
+Caso queiram olhar os dados com maior detalhe:
 
-# Modo diferente com outras funcoes
-
-qtm(mun_sp) +
-  tm_legend(show = FALSE)
-
-tm_shape(distrito_sp) +
-  tm_fill() +
-  tm_shape(lugares) +
-  tm_bubbles(col = "red", size = 0.15) 
-
-# tabela
-
-
-tabela <- cinema_sp %>% 
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+cinema_sp %>% 
   select(NOME_SALA, SITUACAO_SALA, NOME_COMPLEXO, endereco, REGISTRO_COMPLEXO) %>% 
   distinct(REGISTRO_COMPLEXO, .keep_all = TRUE) %>% 
-  kableExtra::kbl %>% 
-  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
+  kableExtra::kbl() %>% 
+  kableExtra::kable_paper() %>%
+  kableExtra::scroll_box(width = "100%", height = "500px")
 
-
+```
 
