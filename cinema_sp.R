@@ -12,6 +12,8 @@ library(leaflet)
 
 # Dados ----------------------------------------------------------------------------------------------------
 
+
+
 eliminar_colunas <- c("PAGINA_ELETRONICA_COMPLEXO", "COMPLEMENTO_ENDERECO", "COMPLEXO_ITINERANTE", "OPERACAO_USUAL", 
                       "EXIBIDOR", "REGISTRO_EXIBIDOR", "CNPJ_EXIBIDOR", "GRUPO_EXIBIDOR")
 
@@ -20,6 +22,7 @@ eliminar_colunas <- c("PAGINA_ELETRONICA_COMPLEXO", "COMPLEMENTO_ENDERECO", "COM
 base_dados <- fread("C:\\Users\\mcaio\\Desktop\\Nova pasta\\Salas_cinemas.csv",
                     encoding = "Latin-1",
                     drop = eliminar_colunas)
+
 
 
 
@@ -103,23 +106,46 @@ endereco_cinema<- endereco_cinema %>% mutate(endereco = case_when(endereco == "A
                                                                   endereco == "RUA FREI CANECA - 569" ~ "RUA FREI CANECA - 569- BELA VISTA",
                                                                   endereco == "RUA ENGENHEIRO ARMANDO DE ARRUDA PEREIRA - 5241" ~ "AVENIDA ENGENHEIRO ARMANDO DE ARRUDA PEREIRA - 5241, 5241 - Vila do Encontro, São Paulo",
                                                                   endereco == "RUA COSTA BRITO - 46" ~ "Rua Mário Lago, Jardim Guapira",TRUE ~ endereco))
+
+
+
+
 # Pegando as Latitudes e Longitudes----------------------------------------------------------------------------------------------------
+
+
+
 
 lugares <- geocode_OSM(endereco_cinema$endereco, projection = 4326, as.sf = T)
 
 
+
+
+
 # mapas interativos----------------------------------------------------------------------------------------------------
 
+
+
 lugares %>% mapview()
+
+
 
 leaflet(lugares) %>% addTiles() %>% addMarkers() 
 
 
+
+
 # Arquivo shape com os distritos de sp----------------------------------------------------------------------------------------------------
+
+
 
 distrito_sp <- st_read("C:\\Users\\mcaio\\Desktop\\cinema\\LAYER_DISTRITO\\DEINFO_DISTRITO.shp")
 
+
+
+
 # mapa dos distritos de sp com a localização dos cinemas
+
+
 
 ggplot(distrito_sp) + 
   geom_sf() + 
@@ -131,7 +157,9 @@ ggplot(distrito_sp) +
 
 
 
+
 # Modo diferente com outras funcoes
+
 
 qtm(mun_sp) +
   tm_legend(show = FALSE)
@@ -140,6 +168,9 @@ tm_shape(distrito_sp) +
   tm_fill() +
   tm_shape(lugares) +
   tm_bubbles(col = "red", size = 0.15) 
+
+
+
 
 # tabela
 
