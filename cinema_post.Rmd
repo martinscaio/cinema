@@ -8,7 +8,7 @@ output: html_document
 ### Dados Georeferenciados 
 
 
- Os dados georeferenciados são basicamente dados espaciais que utilizam sua real localização no espaço geográfico. Essa localização é baseada em um par de coordenadas geográficas: latitude e longitude. 
+ Os dados georeferenciados são dados que utilizam sua real localização no espaço geográfico. Essa localização é baseada em um par de coordenadas geográficas: latitude e longitude. 
  Sempre que desejarmos plotar objetos em um mapa será necessário ter em mãos suas coordenadas geográficas.
 
 Em alguns casos os dados podem já estar georeferenciados, ou seja, trazendo consigo suas coordenadas no espaço geográfico, porém em outras situações é necessário georeferenciá-los. 
@@ -17,12 +17,14 @@ Em suma, o ato de georeferenciar trata-se de coletar a localização(coordenadas
 
 No post de hoje irei demonstrar como georeferenciar dados no R.
 
-Para isso irei utilizar os dados sobre cinema na cidade de São Paulo. Na página do Ancine há um banco de dados sobre as **salas de exibição e complexos de cinema credenciados pela Ancine**. Irei utilizar este banco de dados para o ano de 2019. A ideia será georeferenciar as salas de cinema/complexos para plotar um mapa com as suas localizações. 
+Para isso irei utilizar os dados sobre cinema na cidade de São Paulo. 
+
+Na página da Ancine há um banco de dados sobre as **salas de exibição e complexos de cinema credenciados pela Ancine**. Irei utilizar este banco de dados para o ano de 2019. A ideia é georeferenciar as salas de cinema/complexos e depois plotar um mapa com as suas localizações. 
 
 **Atenção**: o post não pretende fazer qualquer análise sobre a distribuição geográfica de salas de exibição/cinemas na cidade de São Paulo. O objetivo deste post é APENAS demonstrar como trabalhar com dados não georeferenciados no R. 
 
 
-Os dados foram retirados do site da [Ancine](http://dados.cultura.gov.br/dataset/salas-de-exibicao-e-complexos-credenciados-ancine)
+Os dados foram retirados [daqui](http://dados.cultura.gov.br/dataset/salas-de-exibicao-e-complexos-credenciados-ancine)
 
 Abaixo as bibliotecas que iremos utilizar:
 
